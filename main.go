@@ -19,7 +19,7 @@ func print_sorted(languages map[string]int) {
 	for i := range values {
 		for k, v := range languages {
 			if v == values[i] {
-				fmt.Printf("%s, %d\n", k, v)
+				fmt.Printf("%s: %d\n", k, v)
 			}
 		}
 	}
@@ -30,7 +30,7 @@ func main() {
 	wg.Add(100)
 	languages := make(map[string]int)
 	ts := oauth2.StaticTokenSource(&oauth2.Token{
-		AccessToken: "4314e2c3c994dbcb39927a6758ee063de5825e1e"})
+		AccessToken: 
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
 	t := time.Now()
