@@ -5,6 +5,7 @@ import (
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	"log"
+	"os"
 	"sort"
 	"sync"
 	"time"
@@ -26,11 +27,15 @@ func print_sorted(languages map[string]int) {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("<Usage>: ./binary <token>")
+	}
+	token := os.Args[1]
 	var wg sync.WaitGroup
 	wg.Add(100)
 	languages := make(map[string]int)
 	ts := oauth2.StaticTokenSource(&oauth2.Token{
-		AccessToken: "7e9844bd26a6cf3b19d73b2d485113fe0f1bb438",
+		AccessToken: token})
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
 	t := time.Now()
