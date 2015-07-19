@@ -5,51 +5,57 @@ import (
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	"log"
+	"sort"
 	"sync"
 	"time"
 )
 
-type jsonUser struct {
-	Name string `json:"login"`
-	Blog string `json:"blog"`
-}
-
-type jsonAuth struct {
-	client_id     string `json:"login"`
-	client_secret string `json:"blog"`
+func print_sorted(languages map[string]int) {
+	var values []int
+	for k := range languages {
+		values = append(values, languages[k])
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(values)))
+	for i := range values {
+		for k, v := range languages {
+			if v == values[i] {
+				fmt.Printf("%s, %d\n", k, v)
+			}
+		}
+	}
 }
 
 func main() {
 	var wg sync.WaitGroup
 	wg.Add(100)
-	languages := map[string]int64{}
+	languages := make(map[string]int)
 	ts := oauth2.StaticTokenSource(&oauth2.Token{
 		AccessToken: "4314e2c3c994dbcb39927a6758ee063de5825e1e"})
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
+	t := time.Now()
+	query := fmt.Sprintf("created:>%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 	opt := &github.SearchOptions{
 		Sort: "desc",
 		ListOptions: github.ListOptions{
 			PerPage: 100,
 		},
 	}
-	t := time.Now()
-	date := fmt.Sprintf("created:>%d-%02d-%02d", t.Year(), t.Month(), t.Day())
-	results, _, err := client.Search.Repositories(date, opt)
+	results, _, err := client.Search.Repositories(query, opt)
 	if err != nil {
 		log.Printf("[Error]: %s\n", err)
 	} else {
 		for i := range results.Repositories {
 			go func(i int) {
 				defer wg.Done()
-				lgs, _, err := client.Repositories.ListLanguages(
+				langs, _, err := client.Repositories.ListLanguages(
 					*results.Repositories[i].Owner.Login,
 					*results.Repositories[i].Name)
 				if err != nil {
 					log.Printf("[Error] : %s\n", err)
 				} else {
-					for key, value := range lgs {
-						languages[key] += int64(value)
+					for key, value := range langs {
+						languages[key] += value
 					}
 				}
 			}(i)
@@ -57,7 +63,5 @@ func main() {
 		}
 	}
 	wg.Wait()
-	for key, value := range languages {
-		fmt.Printf("%s: %d lines\n", key, value)
-	}
+	print_sorted(languages)
 }
