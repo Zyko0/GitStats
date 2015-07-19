@@ -30,7 +30,7 @@ func main() {
 	wg.Add(100)
 	languages := make(map[string]int)
 	ts := oauth2.StaticTokenSource(&oauth2.Token{
-		AccessToken: 
+		AccessToken: "7e9844bd26a6cf3b19d73b2d485113fe0f1bb438"
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
 	t := time.Now()
